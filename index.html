@@ -25,10 +25,7 @@
             <div class="progress-bar" id="progressBar"></div>
         </div>
 
-        <!-- Versteckter iframe: fängt Formspree-Antwort ab, verhindert Seitenweiterleitung -->
-        <iframe name="formspree_target" id="formspree_target" style="display:none;"></iframe>
-
-        <form id="quizForm" action="https://formspree.io/f/mdappyeq" method="POST" target="formspree_target">
+        <form id="quizForm" action="https://formspree.io/f/mdappyeq" method="POST">
 
             <!-- Tracking: versteckte Felder (werden via JS befüllt) -->
             <input type="hidden" name="quelle" value="">

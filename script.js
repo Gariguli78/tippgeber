@@ -40,42 +40,26 @@ function showAlternative() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ── Formular-Submit mit iframe-Trick (kein AJAX nötig) ────────────────────
+// ── Formular-Submit via AJAX ───────────────────────────────────────────────
 document.getElementById('quizForm').addEventListener('submit', function (e) {
+    e.preventDefault();
 
-    // Welcher Pfad ist aktiv?
     const isAlternative = document.getElementById('stepAlternative').classList.contains('active');
 
     // ── Validierung ────────────────────────────────────────────────────────
     if (isAlternative) {
         const emailZusatz   = document.querySelector('[name="email_zusatz"]').value.trim();
         const consentZusatz = document.querySelector('[name="consent_analyse_zusatz"]').checked;
-        if (!emailZusatz) {
-            e.preventDefault();
-            showFieldError('email_zusatz', 'Bitte gib deine E-Mail-Adresse ein.');
-            return;
-        }
-        if (!consentZusatz) {
-            e.preventDefault();
-            showConsentError('consent_analyse_zusatz');
-            return;
-        }
+        if (!emailZusatz)   { showFieldError('email_zusatz', 'Bitte gib deine E-Mail-Adresse ein.'); return; }
+        if (!consentZusatz) { showConsentError('consent_analyse_zusatz'); return; }
     } else {
         const email   = document.querySelector('[name="email"]').value.trim();
         const consent = document.querySelector('[name="consent_analyse"]').checked;
-        if (!email) {
-            e.preventDefault();
-            showFieldError('email', 'Bitte gib deine E-Mail-Adresse ein.');
-            return;
-        }
-        if (!consent) {
-            e.preventDefault();
-            showConsentError('consent_analyse');
-            return;
-        }
+        if (!email)   { showFieldError('email', 'Bitte gib deine E-Mail-Adresse ein.'); return; }
+        if (!consent) { showConsentError('consent_analyse'); return; }
     }
 
-    // ── Validierung bestanden: Button-Zustand & Erfolgsmeldung ─────────────
+    // ── Button-Ladezustand ─────────────────────────────────────────────────
     const submitBtn = isAlternative
         ? document.querySelector('#stepAlternative button[type="submit"]')
         : document.querySelector('#step5 button[type="submit"]');
@@ -83,11 +67,27 @@ document.getElementById('quizForm').addEventListener('submit', function (e) {
     submitBtn.disabled    = true;
     submitBtn.textContent = 'Wird gesendet …';
 
-    // Formular postet in den versteckten iframe — Seite bleibt stehen.
-    // Erfolgsmeldung erscheint nach kurzem Delay (Formspree braucht ~500ms).
-    setTimeout(function () {
-        showSuccess(isAlternative);
-    }, 800);
+    // ── AJAX-Request ───────────────────────────────────────────────────────
+    fetch('https://formspree.io/f/mdappyeq', {
+        method:  'POST',
+        body:    new FormData(document.getElementById('quizForm')),
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(function (response) {
+        if (response.ok) {
+            showSuccess(isAlternative);
+        } else {
+            return response.json().then(function (data) {
+                throw new Error(data.error || 'Unbekannter Fehler');
+            });
+        }
+    })
+    .catch(function (err) {
+        submitBtn.disabled    = false;
+        submitBtn.textContent = isAlternative ? 'Persönliche Empfehlung erhalten' : 'Jetzt kostenlose Auswertung erhalten';
+        showError('Etwas ist schiefgelaufen. Bitte versuche es nochmal oder melde dich direkt bei uns.');
+        console.error('Formspree error:', err);
+    });
 });
 
 // ── Erfolgsmeldung ─────────────────────────────────────────────────────────

@@ -256,6 +256,24 @@
         }
         .config-hint { font-size: 0.78rem; color: #aaa; margin-top: 6px; }
 
+        /* ── Backup-Buttons ─────────────────────────────────────────── */
+        .btn-backup {
+            padding: 11px 20px;
+            background: white;
+            color: var(--primary-blue);
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-backup:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .btn-import { cursor: pointer; }
+
         @media (max-width: 540px) {
             .admin-header { padding: 36px 16px 28px; }
             .admin-header h1 { font-size: 1.7rem; }
@@ -312,6 +330,25 @@
                     Füge oben den ersten Tippgeber hinzu.
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ── Backup ──────────────────────────────────────────────────── -->
+    <div class="card">
+        <div class="card-head">💾 Datensicherung</div>
+        <div class="card-body">
+            <p style="font-size:0.88rem;color:#666;margin-bottom:16px;">
+                Exportiere die Tippgeber-Liste als JSON-Datei und speichere sie in Google Drive.
+                Bei einem Browser-Reset einfach die Datei wieder importieren — alle Daten sind wiederhergestellt.
+            </p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-backup" onclick="exportData()">⬇ Backup herunterladen</button>
+                <label class="btn-backup btn-import">
+                    ⬆ Backup einspielen
+                    <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+                </label>
+            </div>
+            <p id="importFeedback" style="display:none;font-size:0.82rem;color:#22c55e;margin-top:10px;font-weight:600;"></p>
         </div>
     </div>
 
@@ -491,6 +528,66 @@ function esc(str) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+// ── Export ───────────────────────────────────────────────────────────
+function exportData() {
+    const payload = {
+        version:    1,
+        exportedAt: new Date().toISOString(),
+        config:     loadConfig(),
+        tippgeber:  loadTippgeber()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const date = new Date().toISOString().slice(0, 10);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'goethefinanz-tippgeber-' + date + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ── Import ───────────────────────────────────────────────────────────
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            // Validierung
+            if (!Array.isArray(data.tippgeber)) throw new Error('Ungültiges Format');
+
+            // Zusammenführen: bestehende IDs nicht überschreiben, neue ergänzen
+            const existing = loadTippgeber();
+            const existingIds = new Set(existing.map(t => t.id));
+            const incoming = data.tippgeber.filter(t => !existingIds.has(t.id));
+            const merged = existing.concat(incoming);
+
+            saveTippgeber(merged);
+            if (data.config && data.config.baseUrl) {
+                localStorage.setItem(LS_KEY_CONFIG, JSON.stringify(data.config));
+            }
+
+            renderList();
+
+            const fb = document.getElementById('importFeedback');
+            fb.textContent = incoming.length > 0
+                ? '✓ ' + incoming.length + ' neue Tippgeber importiert.'
+                : '✓ Alle Einträge waren bereits vorhanden — nichts überschrieben.';
+            fb.style.display = 'block';
+            setTimeout(() => { fb.style.display = 'none'; }, 4000);
+
+        } catch(err) {
+            alert('Fehler beim Import: Die Datei scheint kein gültiges Goethefinanz-Backup zu sein.');
+        }
+        // Input zurücksetzen damit dieselbe Datei nochmal gewählt werden kann
+        event.target.value = '';
+    };
+    reader.readAsText(file);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────

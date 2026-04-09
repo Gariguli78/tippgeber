@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PKV Check | Goethefinanz</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="main-header">
+    <img src="https://goethefinanz.de/wp-content/uploads/2024/12/WEB_Logo_unabhaengig-2.gif">
+</header>
+
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1><span>Dein PKV-Check in 2 Minuten</span></h1>
+            <p>Finde in 4 kurzen Schritten heraus, ob sich die private Krankenversicherung für dich rechnet — und welche Leistungen du als Privatpatient tatsächlich bekommst. Unabhängig, kostenfrei, ohne Verkaufsdruck.</p>
+        </div>
+    </section>
+
+    <div class="quiz-container">
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <form id="quizForm" action="https://formspree.io/f/mdappyeq" method="POST">
+
+            <!-- Tracking: versteckte Felder (werden via JS befüllt) -->
+            <input type="hidden" name="quelle" value="">
+            <input type="hidden" name="tippgeber_id" value="">
+
+            <!-- Schritt 1: Beruflicher Status -->
+            <div class="step active" id="step1">
+                <h2>Los geht's: Was machst du beruflich?</h2>
+                <p>Dein Beschäftigungsverhältnis bestimmt, welche Wechsel-Voraussetzungen für dich gelten. Keine Sorge — wir erklären jeden Schritt.</p>
+                <div class="options">
+                    <label><input type="radio" name="status" value="Angestellt" required onclick="nextStep(2)"> Angestellt / Verbeamtet</label>
+                    <label><input type="radio" name="status" value="Selbstständig" onclick="nextStep(2)"> Selbstständig / Unternehmer:in</label>
+                    <label><input type="radio" name="status" value="Freiberuflich" onclick="nextStep(2)"> Freiberuflich (z.&nbsp;B. Arzt, Anwalt, Kreative)</label>
+                </div>
+            </div>
+
+            <!-- Schritt 2: Einkommens-Filter -->
+            <div class="step" id="step2">
+                <h2>Dein Einkommen</h2>
+                <p>Liegt dein Bruttoeinkommen 2026 über <strong>73.800&nbsp;€</strong> pro Jahr (6.150&nbsp;€ monatlich)? Das ist die gesetzliche Versicherungspflichtgrenze — ab dieser Schwelle steht dir der Wechsel in die PKV offen.</p>
+                <div class="options">
+                    <button type="button" class="btn" onclick="nextStep(3)">Ja — darüber</button>
+                    <button type="button" class="btn btn-outline" onclick="showAlternative()">Noch nicht — darunter</button>
+                </div>
+                <div class="feedback">
+                    <strong>Gut zu wissen:</strong> Die gesetzliche Krankenversicherung folgt dem <em>Solidaritätsprinzip</em> — dein Beitrag richtet sich nach deinem Einkommen, nicht nach deiner Gesundheit. Die PKV funktioniert umgekehrt nach dem <em>Äquivalenzprinzip</em>: Dein Beitrag bemisst sich nach Alter, Gesundheitszustand und gewähltem Leistungsumfang. Das bedeutet: Je früher du wechselst, desto stabiler dein Beitrag — und desto besser dein Leistungsanspruch, der dir vertraglich garantiert bleibt.
+                </div>
+            </div>
+
+            <!-- Schritt 3: Prioritäten -->
+            <div class="step" id="step3">
+                <h2>Was ist dir am wichtigsten?</h2>
+                <p>Wähle, was in deiner Krankenversicherung den größten Unterschied machen soll. Wir gewichten deine Antwort in der Auswertung.</p>
+                <div class="options">
+                    <label><input type="radio" name="prio" value="Beitrag" required> Planbare Beiträge — auch mit 70+ durch gesetzliche Altersrückstellungen</label>
+                    <label><input type="radio" name="prio" value="Leistung"> Spitzenmedizin auf Abruf — direkter Zugang zu Spezialisten, modernster Diagnostik und Chefarztbehandlung</label>
+                    <label><input type="radio" name="prio" value="Flex"> Volle Kontrolle — Tarif jederzeit anpassbar, lebenslang gesicherte Leistungen</label>
+                </div>
+                <button type="button" class="btn" onclick="nextStep(4)">Weiter zum Gesundheits-Check</button>
+                <div class="feedback">
+                    <strong>Wichtig zu wissen:</strong> In der PKV sind deine Leistungen <em>vertraglich garantiert</em> — sie können dir, anders als in der GKV, nicht durch politische Entscheidungen gekürzt werden. Was du heute abschließt, gilt ein Leben lang.
+                </div>
+            </div>
+
+            <!-- Schritt 4: Gesundheits-Check -->
+            <div class="step" id="step4">
+                <h2>Deine gesundheitliche Ausgangslage</h2>
+                <p>Gab es in den letzten 5 Jahren stationäre Klinikaufenthalte oder laufende Behandlungen wegen chronischer Erkrankungen? Deine Antwort hilft uns, realistische Tarife vorzufiltern — sie ist <strong>keine</strong> verbindliche Gesundheitserklärung.</p>
+                <div class="options">
+                    <label><input type="radio" name="gesundheit" value="Ja" required> Ja — das gab es</label>
+                    <label><input type="radio" name="gesundheit" value="Nein"> Nein — bin gesund</label>
+                </div>
+                <button type="button" class="btn" onclick="nextStep(5)">Auswertung freischalten →</button>
+                <div class="feedback">
+                    <strong>Beruhigend:</strong> Auch mit Vorerkrankungen ist ein PKV-Wechsel oft möglich — manche Versicherer arbeiten mit Risikozuschlägen statt mit Ablehnungen. Wir prüfen deinen Fall anonym bei mehreren Anbietern, ohne dass du selbst eine Anfrage stellen musst (keine Spuren in deiner Versicherungshistorie).
+                </div>
+            </div>
+
+            <!-- Schritt 5: Kontakt -->
+            <div class="step" id="step5">
+                <h2>Fast geschafft — wohin mit deiner Auswertung?</h2>
+                <p>Auf Basis deiner Angaben erstellen wir dir eine persönliche Tarifanalyse: passende Anbieter, realistische Monatsbeiträge und Leistungen im Vergleich. Du bekommst die Auswertung innerhalb von 24 Stunden — unverbindlich und kostenfrei.</p>
+
+                <p class="tippgeber-hint" style="display:none;"></p>
+
+                <input type="email" name="email" placeholder="Deine E-Mail-Adresse" required>
+                <input type="tel" name="telefon" placeholder="Telefonnummer (optional — nur bei Rückfragen)">
+
+                <div class="consent-block">
+                    <label class="consent-label">
+                        <input type="checkbox" name="consent_analyse" value="ja" required>
+                        <span>Ich stimme zu, dass Goethefinanz meine Angaben zur Erstellung der persönlichen PKV-Analyse verarbeitet. Diese Einwilligung ist für die Zusendung der Auswertung erforderlich. <a href="https://goethefinanz.de/datenschutz" target="_blank">Datenschutzerklärung</a> · <a href="https://goethefinanz.de/impressum" target="_blank">Impressum</a></span>
+                    </label>
+                    <label class="consent-label optional">
+                        <input type="checkbox" name="consent_marketing" value="ja">
+                        <span>Ich möchte künftig hilfreiche Informationen rund um PKV, Beitragsoptimierung und Absicherung per E-Mail erhalten. Diese Einwilligung ist freiwillig und jederzeit widerrufbar.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">Jetzt kostenlose Auswertung erhalten</button>
+
+                <p class="disclaimer">🔒 Deine Daten werden ausschließlich für die genannten Zwecke genutzt und nicht an Dritte weitergegeben.</p>
+            </div>
+
+            <!-- Alternativ-Pfad -->
+            <div class="step" id="stepAlternative">
+                <!-- Eigene versteckte Tracking-Felder für diesen Pfad -->
+                <input type="hidden" name="pfad" value="zusatz">
+                <input type="hidden" name="quelle" value="">
+                <input type="hidden" name="tippgeber_id" value="">
+
+                <h2>Dein Weg zum Privatpatienten-Status</h2>
+                <p>Ein vollständiger PKV-Wechsel ist aktuell noch nicht möglich — <strong>aber das ist oft sogar die klügere Strategie:</strong> Mit gezielten Zusatzversicherungen sicherst du dir einzelne Privatpatienten-Leistungen zu einem Bruchteil des Vollbeitrags. Und du kannst später immer noch wechseln.</p>
+
+                <p class="tippgeber-hint" style="display:none;"></p>
+
+                <div class="options">
+                    <p><strong>Welche Leistungen möchtest du dir jetzt schon sichern?</strong> (Mehrfachauswahl möglich)</p>
+                    <label><input type="checkbox" name="zusatz_typ" value="Stationär"> Stationär: Einbettzimmer und Chefarztbehandlung im Krankenhaus</label>
+                    <label><input type="checkbox" name="zusatz_typ" value="Zahn"> Zahn: Bis zu 90&nbsp;% Kostenübernahme für Implantate, Kronen und Professionelle Zahnreinigung</label>
+                    <label><input type="checkbox" name="zusatz_typ" value="Tagegeld"> Krankentagegeld: Einkommensschutz bei längerer Arbeitsunfähigkeit</label>
+                </div>
+
+                <input type="email" name="email_zusatz" placeholder="Deine E-Mail für die persönliche Empfehlung" required>
+
+                <div class="consent-block">
+                    <label class="consent-label">
+                        <input type="checkbox" name="consent_analyse_zusatz" value="ja" required>
+                        <span>Ich stimme zu, dass Goethefinanz meine Angaben zur Erstellung einer persönlichen Zusatzversicherungs-Empfehlung verarbeitet. <a href="https://goethefinanz.de/datenschutz" target="_blank">Datenschutzerklärung</a> · <a href="https://goethefinanz.de/impressum" target="_blank">Impressum</a></span>
+                    </label>
+                    <label class="consent-label optional">
+                        <input type="checkbox" name="consent_marketing_zusatz" value="ja">
+                        <span>Ich möchte künftig hilfreiche Informationen zu Zusatzversicherungen und Absicherung per E-Mail erhalten. Freiwillig, jederzeit widerrufbar.</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">Persönliche Empfehlung erhalten</button>
+
+                <p class="disclaimer">🔒 Deine Daten werden ausschließlich für die genannten Zwecke genutzt und nicht an Dritte weitergegeben.</p>
+            </div>
+        </form>
+    </div>
+
+    <section class="trust-elements">
+        <div class="trust-item">
+            <strong>Unabhängig</strong>
+            <p>Wir vergleichen über 30 Anbieter ohne Provisionsinteresse.</p>
+        </div>
+        <div class="trust-item">
+            <strong>Transparent</strong>
+            <p>Du bekommst Zahlen und Fakten, kein Verkaufsgespräch.</p>
+        </div>
+        <div class="trust-item">
+            <strong>Garantiert kostenfrei</strong>
+            <p>Unsere Beratung ist für dich immer gratis — unabhängig vom Abschluss.</p>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <p>&copy; 2026 Goethefinanz |
+        <a href="https://goethefinanz.de/impressum" target="_blank">Impressum</a> |
+        <a href="https://goethefinanz.de/impressum" target="_blank">Datenschutz</a>
+    </p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -281,9 +281,106 @@
             .tg-actions { gap: 6px; }
             .btn-sm { font-size: 0.78rem; padding: 6px 10px; }
         }
+
+        /* ── Login Overlay ──────────────────────────────────────────── */
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0a2540 0%, #0d3260 60%, #0a2540 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: white;
+            border-radius: 16px;
+            padding: 48px 40px 40px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .login-logo {
+            display: inline-block;
+            background: rgba(197,160,89,0.15);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .login-box h2 {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+        }
+        .login-box p {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 28px;
+        }
+        .login-box input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .login-box input[type="password"]:focus {
+            border-color: var(--primary-blue);
+        }
+        .login-box input[type="password"].error {
+            border-color: #ef4444;
+            animation: shake 0.3s ease;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .login-error {
+            font-size: 0.85rem;
+            color: #ef4444;
+            margin-top: 8px;
+            min-height: 20px;
+        }
+        .login-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover { background: #0d3260; }
     </style>
 </head>
 <body>
+
+<!-- ── Login Overlay ──────────────────────────────────────────────────── -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <div class="login-logo">Goethefinanz</div>
+        <h2>Tippgeber-Verwaltung</h2>
+        <p>Bitte Passwort eingeben, um fortzufahren.</p>
+        <input type="password" id="loginInput" placeholder="Passwort" autocomplete="current-password">
+        <div class="login-error" id="loginError"></div>
+        <button class="login-btn" onclick="checkLogin()">Anmelden</button>
+    </div>
+</div>
 
 <div class="admin-header">
     <div class="admin-badge">Goethefinanz</div>
@@ -593,6 +690,40 @@ function importData(event) {
 
 // ── Init ──────────────────────────────────────────────────────────────
 renderList();
+
+// ── Login ──────────────────────────────────────────────────────────────
+(function() {
+    const PASS = 'derrik';
+    const SESSION_KEY = 'gf_admin_auth';
+
+    function checkLogin() {
+        const input = document.getElementById('loginInput');
+        const error = document.getElementById('loginError');
+        if (input.value === PASS) {
+            sessionStorage.setItem(SESSION_KEY, '1');
+            document.getElementById('loginOverlay').style.display = 'none';
+        } else {
+            input.classList.add('error');
+            error.textContent = 'Falsches Passwort. Bitte erneut versuchen.';
+            input.value = '';
+            setTimeout(() => input.classList.remove('error'), 400);
+            input.focus();
+        }
+    }
+
+    // Enter-Taste
+    document.getElementById('loginInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') checkLogin();
+    });
+
+    // checkLogin global verfügbar machen (für onclick)
+    window.checkLogin = checkLogin;
+
+    // Bereits eingeloggt in dieser Session?
+    if (sessionStorage.getItem(SESSION_KEY) === '1') {
+        document.getElementById('loginOverlay').style.display = 'none';
+    }
+})();
 </script>
 </body>
 </html>

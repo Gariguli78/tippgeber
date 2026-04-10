@@ -693,13 +693,16 @@ renderList();
 
 // ── Login ──────────────────────────────────────────────────────────────
 (function() {
-    const PASS = 'derrik';
+    const HASH = 'a4f1dbeec277151f1a08a7979895c9170dbadb72fcfe1253530b849726789fb5';
     const SESSION_KEY = 'gf_admin_auth';
 
-    function checkLogin() {
+    async function checkLogin() {
         const input = document.getElementById('loginInput');
         const error = document.getElementById('loginError');
-        if (input.value === PASS) {
+        const msgBuffer = new TextEncoder().encode(input.value);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashHex = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+        if (hashHex === HASH) {
             sessionStorage.setItem(SESSION_KEY, '1');
             document.getElementById('loginOverlay').style.display = 'none';
         } else {
@@ -711,15 +714,12 @@ renderList();
         }
     }
 
-    // Enter-Taste
     document.getElementById('loginInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') checkLogin();
     });
 
-    // checkLogin global verfügbar machen (für onclick)
     window.checkLogin = checkLogin;
 
-    // Bereits eingeloggt in dieser Session?
     if (sessionStorage.getItem(SESSION_KEY) === '1') {
         document.getElementById('loginOverlay').style.display = 'none';
     }
